@@ -13,8 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Inventory {
     @Id
     private String id;
-    private int stockId;
-    private int productId;
+    private String stockId;
+    private String productId;
     private int quantity;
     private String warehouse;
 }

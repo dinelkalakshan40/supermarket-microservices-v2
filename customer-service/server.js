@@ -7,7 +7,9 @@ app.use(express.json());
 
 connectDB();
 
-app.post('/customer',async (req,res)=>{
+
+
+app.post('/customers/addCustomer',async (req,res)=>{
     try{
         const customer =new Customer(req.body);
         await customer.save();
@@ -17,7 +19,7 @@ app.post('/customer',async (req,res)=>{
     }
 })
 
-app.get('/customers', async (req,res)=>{
+app.get('/customers/getAllCustomers', async (req,res)=>{
     try {
         const customers=await Customer.find();
         res.json(customers);
@@ -26,7 +28,7 @@ app.get('/customers', async (req,res)=>{
     }
 })
 
-app.get('/customers/:id', async (req,res)=>{
+app.get('/customers/getCustomer/:id', async (req,res)=>{
     try {
         const customer=await Customer.findOne({customerId:req.params.id});
         if(!customer) return res.status(404).json({error:'Customer not found'});
@@ -36,7 +38,7 @@ app.get('/customers/:id', async (req,res)=>{
     }
 });
 
-app.put('/customers/:id', async (req,res) =>{
+app.put('/customers/updateCustomer/:id', async (req,res) =>{
     try {
         const customer =await Customer.findOneAndUpdate(
             {customerId:req.params.id},
@@ -49,7 +51,7 @@ app.put('/customers/:id', async (req,res) =>{
     }
 });
 
-app.delete('/customers/:id', async (req, res) => {
+app.delete('/customers/deleteCustomer/:id', async (req, res) => {
     try {
         const customer = await Customer.findOneAndDelete({ customerId: req.params.id });
         if (!customer) return res.status(404).json({ error: 'Customer not found' });

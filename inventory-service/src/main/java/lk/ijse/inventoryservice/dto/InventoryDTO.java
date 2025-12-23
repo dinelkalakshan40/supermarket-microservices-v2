@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class InventoryDTO {
     private String id;   // for update & response
-    private int stockId;
-    private int productId;
+    private String stockId;
+    private String productId;
     private int quantity;
     private String warehouse;
 }
