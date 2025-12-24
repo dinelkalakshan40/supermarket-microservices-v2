@@ -3,6 +3,8 @@ const connectDB=require('./db');
 const Customer =require('./model/customer')
 const  app =express();
 
+const eurekaClient =require('./config/eureka')
+
 app.use(express.json());
 
 connectDB();
@@ -64,4 +66,8 @@ app.delete('/customers/deleteCustomer/:id', async (req, res) => {
 const PORT = 3000
 app.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);
+    eurekaClient.start(err => {
+        if (err) console.error('Eureka registration failed', err);
+        else console.log('Customer Service registered with Eureka');
+    });
 });

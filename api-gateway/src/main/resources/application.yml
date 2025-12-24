@@ -3,28 +3,33 @@ server:
 
 spring:
   application:
-    name: api-gateway
+    name: API-GATEWAY
 
   cloud:
     gateway:
       routes:
 
         - id: order-service
-          uri: http://orderservice:8081
+          uri: lb://ORDER-SERVICE
           predicates:
             - Path=/orders/**
 
         - id: product-service
-          uri: http://productservice:8082
+          uri: lb://INVENTORY-SERVICE
           predicates:
             - Path=/products/**
 
         - id: inventory-service
-          uri: http://inventoryservice:8080
+          uri: lb://INVENTORY-SERVICE
           predicates:
             - Path=/inventory/**
 
         - id: customer-service
-          uri: http://localhost:3000
+          uri: lb://CUSTOMER-SERVICE
           predicates:
             - Path=/customers/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
