@@ -27,11 +27,11 @@ public class ProductService {
     public List<ProductDTO> getAllProducts() {
         return productRepo.findAll().stream().map(product -> modelMapper.map(product, ProductDTO.class)).collect(Collectors.toList());
     }
-    public ProductDTO getProductById(int id) {
+    public ProductDTO getProductById(String id) {
         Product product =productRepo.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
         return modelMapper.map(product, ProductDTO.class);
     }
-    public ProductDTO updateProduct(int id,ProductDTO productDTO) {
+    public ProductDTO updateProduct(String id,ProductDTO productDTO) {
         Product existingProduct =productRepo.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
         existingProduct.setProductId(productDTO.getProductId());
         existingProduct.setProductName(productDTO.getProductName());
@@ -40,7 +40,7 @@ public class ProductService {
         Product updatedProduct = productRepo.save(existingProduct);
         return modelMapper.map(updatedProduct,ProductDTO.class);
     }
-    public void deleteProduct(int id) {
+    public void deleteProduct(String id) {
         Product product = productRepo.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
         productRepo.delete(product);
     }
