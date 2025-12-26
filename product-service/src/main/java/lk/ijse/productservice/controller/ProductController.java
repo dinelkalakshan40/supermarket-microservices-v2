@@ -22,9 +22,9 @@ public class ProductController {
     public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
-    @GetMapping("/{id}")
-    public ProductDTO getProduct(@PathVariable String id) {
-        return productService.getProductById(id);
+    @GetMapping("/{productId}")
+    public ProductDTO getProduct(@PathVariable String productId) {
+        return productService.getProductById(productId);
     }
     @PutMapping("/{id}")
     public ProductDTO updateProduct(@PathVariable String id, @RequestBody ProductDTO productDTO) {

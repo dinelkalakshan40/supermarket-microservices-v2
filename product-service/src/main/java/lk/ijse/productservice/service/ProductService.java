@@ -27,8 +27,8 @@ public class ProductService {
     public List<ProductDTO> getAllProducts() {
         return productRepo.findAll().stream().map(product -> modelMapper.map(product, ProductDTO.class)).collect(Collectors.toList());
     }
-    public ProductDTO getProductById(String id) {
-        Product product =productRepo.findById(id).orElseThrow(()-> new RuntimeException("Product not found"));
+    public ProductDTO getProductById(String productId) {
+        Product product =productRepo.findById(productId).orElseThrow(()-> new RuntimeException("Product not found"));
         return modelMapper.map(product, ProductDTO.class);
     }
     public ProductDTO updateProduct(String id,ProductDTO productDTO) {
