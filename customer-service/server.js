@@ -9,8 +9,6 @@ app.use(express.json());
 
 connectDB();
 
-
-
 app.post('/customers/addCustomer',async (req,res)=>{
     try{
         const customer =new Customer(req.body);
@@ -62,6 +60,9 @@ app.delete('/customers/deleteCustomer/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+app.get('/heath',(res,req)=>{
+    res.status(200).json({status:'UP'})
+})
 
 const PORT = 3000
 app.listen(PORT,()=>{

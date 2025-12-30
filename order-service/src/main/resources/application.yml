@@ -4,8 +4,24 @@ server:
 spring:
   application:
     name: ORDER-SERVICE
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/orderdb
 
-  eureka:
-    client:
-      service-url:
-        defaultZone: http://localhost:8761/eureka
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      customerService:
+        register-health-indicator: true
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
