@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,18 +35,19 @@ public class OrderService {
             order.setDate(LocalDate.now());
         }
 
-        String url =
-                "http://CUSTOMER-SERVICE/customers/getCustomer/" +
-                        order.getCustomerId();
-
         return webClient.build()
                 .get()
-                .uri(url)
+                .uri("http://CUSTOMER-SERVICE/customers/getCustomer/{id}",
+                        order.getCustomerId())
                 .retrieve()
-                .toBodilessEntity() // Only check if customer exists
-                .flatMap(response -> orderRepo.save(order) // Save order reactively
-                        .map(this::entityToDto)
-                );
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> Mono.error(new RuntimeException("Customer service error"))
+                )
+                .toBodilessEntity()
+                .timeout(Duration.ofSeconds(3))   // 🔥 VERY IMPORTANT
+                .flatMap(res -> orderRepo.save(order))
+                .map(this::entityToDto);
     }
 
     public Mono<OrderDTO> customerFallback(
