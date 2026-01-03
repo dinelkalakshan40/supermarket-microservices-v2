@@ -10,6 +10,7 @@ import lk.ijse.orderservice.repo.OrderRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -34,19 +35,36 @@ public class OrderService {
         if (order.getDate() == null) {
             order.setDate(LocalDate.now());
         }
+        WebClient client = webClient.build(); // use the injected builder once
 
-        return webClient.build()
-                .get()
-                .uri("http://CUSTOMER-SERVICE/customers/getCustomer/{id}",
-                        order.getCustomerId())
+        // 1️⃣ Validate Customer
+        Mono<Void> customerCheck = client.get()
+                .uri("http://CUSTOMER-SERVICE/customers/getCustomer/{id}", order.getCustomerId())
                 .retrieve()
                 .onStatus(
                         status -> status.is4xxClientError() || status.is5xxServerError(),
-                        response -> Mono.error(new RuntimeException("Customer service error"))
+                        resp -> Mono.error(new RuntimeException("Customer service error"))
                 )
                 .toBodilessEntity()
-                .timeout(Duration.ofSeconds(3))   // 🔥 VERY IMPORTANT
-                .flatMap(res -> orderRepo.save(order))
+                .timeout(Duration.ofSeconds(3))
+                .then(); // Mono<Void>
+
+        // 2️⃣ Validate all Products
+        Mono<Void> productsCheck = Flux.fromIterable(order.getItems())
+                .flatMap(item -> client.get()
+                        .uri("http://PRODUCT-SERVICE/products/{id}", item.getProductId())
+                        .retrieve()
+                        .onStatus(
+                                status -> status.is4xxClientError() || status.is5xxServerError(),
+                                resp -> Mono.error(new RuntimeException("Product not found: " + item.getProductId()))
+                        )
+                        .bodyToMono(Void.class)
+                )
+                .then(); // Mono<Void> after all products validated
+
+        // 3️⃣ Combine Customer + Products validation, then save
+        return Mono.zip(customerCheck, productsCheck) // both must succeed
+                .then(orderRepo.save(order))
                 .map(this::entityToDto);
     }
 
