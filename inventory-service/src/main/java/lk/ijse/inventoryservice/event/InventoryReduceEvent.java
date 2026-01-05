@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class InventoryReduceEvent {
-    private String productId;
+public class InventoryReduceEvent{
+    private String stockId;
     private int quantity;
 }

@@ -16,12 +16,14 @@ public class InventoryListener {
 
     @RabbitListener(queues = RabbitMQConstants.QUEUE)
     public void reduceInventory(InventoryReduceEvent event){
+        System.out.println("Received InventoryReduceEvent: " + event);
         Inventory inventory = inventoryRepo
-                .findByProductId(event.getProductId())
+                .findByStockId(event.getStockId())
                 .orElseThrow(() -> new RuntimeException("Inventory not found"));
-
+        System.out.println("Current stock: " + inventory.getQuantity());
         inventory.setQuantity(inventory.getQuantity() - event.getQuantity());
 
         inventoryRepo.save(inventory);
+        System.out.println("Stock after reduction: " + inventory.getQuantity());
     }
 }
