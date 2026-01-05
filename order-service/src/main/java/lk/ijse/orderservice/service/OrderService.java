@@ -3,10 +3,13 @@ package lk.ijse.orderservice.service;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lk.ijse.orderservice.DTO.OrderDTO;
 import lk.ijse.orderservice.DTO.OrderItemDTO;
+import lk.ijse.orderservice.config.RabbitMQConstants;
 import lk.ijse.orderservice.config.WebClientConfig;
+import lk.ijse.orderservice.event.InventoryReduceEvent;
 import lk.ijse.orderservice.model.OrderItem;
 import lk.ijse.orderservice.model.Orders;
 import lk.ijse.orderservice.repo.OrderRepo;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,6 +26,9 @@ public class OrderService {
 
     @Autowired
     private OrderRepo orderRepo;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private WebClient.Builder webClient;
@@ -62,10 +68,26 @@ public class OrderService {
                 )
                 .then(); // Mono<Void> after all products validated
 
-        // 3️⃣ Combine Customer + Products validation, then save
-        return Mono.zip(customerCheck, productsCheck) // both must succeed
-                .then(orderRepo.save(order))
-                .map(this::entityToDto);
+        //Combine Customer + Products validation, then save
+        return Mono.zip(customerCheck, productsCheck)
+                .then(orderRepo.save(order))          // Mono<Orders>
+                .map(savedOrder -> {
+
+                    // Send RabbitMQ events
+                    savedOrder.getItems().forEach(item -> {
+                        InventoryReduceEvent event =
+                                new InventoryReduceEvent(item.getProductId(), item.getQuantity());
+
+                        rabbitTemplate.convertAndSend(
+                                RabbitMQConstants.EXCHANGE,
+                                RabbitMQConstants.ROUTING_KEY,
+                                event
+                        );
+                    });
+
+                    // Entity → DTO (FIX)
+                    return entityToDto(savedOrder);
+                });
     }
 
     public Mono<OrderDTO> customerFallback(

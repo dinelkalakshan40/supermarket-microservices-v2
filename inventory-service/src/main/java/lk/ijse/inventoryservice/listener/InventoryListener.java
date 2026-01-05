@@ -18,12 +18,12 @@ public class InventoryListener {
     public void reduceInventory(InventoryReduceEvent event){
         System.out.println("Received InventoryReduceEvent: " + event);
         Inventory inventory = inventoryRepo
-                .findByStockId(event.getStockId())
+                .findByProductId(event.getProductId())
                 .orElseThrow(() -> new RuntimeException("Inventory not found"));
-        System.out.println("Current stock: " + inventory.getQuantity());
+        System.out.println("Current Product: " + inventory.getQuantity());
         inventory.setQuantity(inventory.getQuantity() - event.getQuantity());
 
         inventoryRepo.save(inventory);
-        System.out.println("Stock after reduction: " + inventory.getQuantity());
+        System.out.println("Product after reduction: " + inventory.getQuantity());
     }
 }

@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class InventoryReduceEvent{
-    private String stockId;
+    private String productId;
     private int quantity;
 }
