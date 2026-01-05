@@ -21,5 +21,4 @@ public class Orders {
     private String customerId;
     private LocalDate date;
     private List<OrderItem> items;
-
 }
