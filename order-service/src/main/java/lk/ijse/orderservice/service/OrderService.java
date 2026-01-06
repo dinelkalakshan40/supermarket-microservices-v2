@@ -35,7 +35,7 @@ public class OrderService {
 
     @CircuitBreaker(name = "customerService", fallbackMethod = "customerFallback")
     public Mono<OrderDTO> createOrder(OrderDTO orderDTO) {
-        System.out.println("method called");
+
         Orders order = dtoToEntity(orderDTO);
 
         if (order.getDate() == null) {
@@ -43,7 +43,7 @@ public class OrderService {
         }
         WebClient client = webClient.build(); // use the injected builder once
 
-        // 1️⃣ Validate Customer
+        //Validate Customer using CircuitBreaker
         Mono<Void> customerCheck = client.get()
                 .uri("http://CUSTOMER-SERVICE/customers/getCustomer/{id}", order.getCustomerId())
                 .retrieve()
@@ -55,7 +55,7 @@ public class OrderService {
                 .timeout(Duration.ofSeconds(3))
                 .then(); // Mono<Void>
 
-        // 2️⃣ Validate all Products
+        // Validate all Products with RestAPIS
         Mono<Void> productsCheck = Flux.fromIterable(order.getItems())
                 .flatMap(item -> client.get()
                         .uri("http://PRODUCT-SERVICE/products/{id}", item.getProductId())
@@ -85,11 +85,10 @@ public class OrderService {
                         );
                     });
 
-                    // Entity → DTO (FIX)
+                    // Entity → DTO
                     return entityToDto(savedOrder);
                 });
     }
-
     public Mono<OrderDTO> customerFallback(
             OrderDTO dto,
             Throwable ex
