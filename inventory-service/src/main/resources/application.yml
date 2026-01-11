@@ -16,3 +16,9 @@ spring:
     stream:
       username: guest
       password: guest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
