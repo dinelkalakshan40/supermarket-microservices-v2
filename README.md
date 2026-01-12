@@ -1,4 +1,4 @@
-# Microservices Order Management System (Backend Only)
+# Microservices  System (Backend Only)
 
 A backend-only microservices system demonstrating real-world enterprise patterns such as service discovery, API Gateway, synchronous and asynchronous communication, circuit breaker, logging, and monitoring.
 
@@ -24,9 +24,11 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 ## Technology Stack
 
 ### Backend
-- Java 17
+- Java 21
 - Spring Boot
 - Spring Cloud (Eureka Server, API Gateway)
+- RESTful Web Services
+- Spring Web / WebClient (for inter-service communication)
 - Node.js
 - Express.js
 
@@ -35,10 +37,11 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 - MongoDB
 
 ### Messaging
-- RabbitMQ
+- RabbitMQ (Asynchronous event-driven communication)
 
 ### Monitoring
-- Prometheus
+- Prometheus (REST API metrics collection)
+
 
 ---
 
@@ -87,11 +90,12 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 
 ## Circuit Breaker Pattern
 
-- Implemented to prevent cascading failures
-- If Inventory Service becomes unavailable:
-  - Circuit breaker opens
-  - Fallback response is returned
-- Improves system resilience and stability
+- Implemented between **Order Service and Customer Service** to prevent cascading failures
+- When Order Service communicates with Customer Service:
+  - If Customer Service becomes unavailable or unresponsive
+  - The circuit breaker opens after configured failure thresholds
+  - A fallback response is returned to Order Service
+- This ensures that Order Service remains stable even when Customer Service is down
 
 ---
 
@@ -106,7 +110,4 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 - Monitored metrics include:
   - Request count
   - Response time
-  - Error rate
-  - JVM metrics
 
-Prometheus UI:
