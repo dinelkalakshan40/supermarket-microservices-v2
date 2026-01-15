@@ -1,3 +1,5 @@
+![System Architecture](Microservices-System.png)
+
 # Microservices  System (Backend Only)
 
 A backend-only microservices system demonstrating real-world enterprise patterns such as service discovery, API Gateway, synchronous and asynchronous communication, circuit breaker, logging, and monitoring.
