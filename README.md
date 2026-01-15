@@ -59,55 +59,114 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 
 ---
 
-## Microservices Overview
+## 4. Microservices Breakdown
 
-| Service Name       | Technology            | Database | Description |
-|--------------------|----------------------|----------|-------------|
-| Product Service    | Spring Boot           | MySQL    | Product management |
-| Inventory Service  | Spring Boot           | MongoDB  | Inventory management |
-| Order Service      | Spring Boot           | MongoDB  | Order processing |
-| Customer Service   | Node.js + Express     | MongoDB  | Customer management |
-| Eureka Server      | Spring Cloud          | —        | Service discovery |
-| API Gateway        | Spring Cloud Gateway  | —        | Central request routing |
-| Prometheus         | Monitoring Tool       | —        | Metrics collection |
-
----
-
-## Communication Patterns
-
-### Synchronous Communication
-- REST-based communication via API Gateway
-- Used for product, customer, and order-related operations
-
-### Asynchronous Communication
-- Event-driven communication using RabbitMQ
-- When an order is placed:
-  - Order Service publishes an event
-  - Inventory Service consumes the event
-  - Inventory quantity is reduced immediately
+| Service | Technology | Database | Responsibility |
+|-------|-----------|----------|---------------|
+| Product Service | Spring Boot | MySQL | Manage product data |
+| Inventory Service | Spring Boot | MongoDB | Track and update stock levels |
+| Order Service | Spring Boot | MongoDB | Handle order lifecycle |
+| Customer Service | Node.js + Express | MongoDB | Manage customer data |
+| Eureka Server | Spring Cloud | — | Service discovery |
+| API Gateway | Spring Cloud Gateway | — | Central routing & security |
+| Prometheus | Monitoring Tool | — | Metrics collection |
 
 ---
 
-## Circuit Breaker Pattern
+## 5. Communication Patterns
 
-- Implemented between **Order Service and Customer Service** to prevent cascading failures
-- When Order Service communicates with Customer Service:
-  - If Customer Service becomes unavailable or unresponsive
-  - The circuit breaker opens after configured failure thresholds
-  - A fallback response is returned to Order Service
-- This ensures that Order Service remains stable even when Customer Service is down
+### 5.1 Synchronous Communication (REST)
+
+Synchronous communication is used where **immediate responses** are required.
+
+Examples:
+- Validating customer information
+- Retrieving product details
+- Creating orders
+
+### 5.2 Asynchronous Communication (Event-Driven)
+
+Asynchronous communication is implemented using RabbitMQ to **decouple services**.
+
+**Order Event Flow**
+1. Order Service successfully places an order
+2. Order Service publishes an `OrderPlaced` event to RabbitMQ
+3. Inventory Service consumes the event
+4. Inventory quantity is reduced accordingly
+
+This approach ensures:
+- Better scalability
+- Non-blocking operations
+- Reduced service coupling
+
 
 ---
 
-## Logging and Monitoring
+## 6. Circuit Breaker Pattern
 
-### Logging
-- Each microservice generates structured logs
-- Logs are used to trace requests and debug failures
+The Circuit Breaker pattern is implemented between:
 
-### Monitoring (Prometheus)
-- Prometheus collects metrics from all services
-- Monitored metrics include:
-  - Request count
-  - Response time
+**Order Service → Customer Service**
 
+### Behavior
+- If Customer Service becomes slow or unavailable:
+  - Failures are tracked
+  - Circuit breaker opens after threshold is reached
+  - Order Service returns a fallback response
+- When Customer Service recovers:
+  - Circuit breaker automatically resets
+
+---
+
+## 7. Logging Strategy
+
+- Each microservice produces **structured logs**
+- Logs capture:
+  - Incoming requests
+  - Service-to-service calls
+  - Errors and exceptions
+- Logs are useful for:
+  - Debugging
+  - Root cause analysis
+  - Tracing request flows across services
+
+---
+
+## 8. Monitoring with Prometheus
+
+### 8.1 Metrics Collection
+
+- Each service exposes metrics via:/actuator/prometheus
+- Prometheus scrapes metrics at regular intervals
+
+### 8.2 Metrics Examples
+- HTTP request count
+- Response latency
+
+---
+
+## 9. Running the System (High-Level)
+
+> This section describes the typical startup order.
+
+1. Start **Eureka Server**
+2. Start **RabbitMQ**
+3. Start **API Gateway**
+4. Start backend services:
+   - Product Service
+   - Inventory Service
+   - Customer Service
+   - Order Service
+5. Start **Prometheus**
+
+All services will automatically register with Eureka and become accessible through the API Gateway.
+
+---
+
+## 10. Testing the System
+
+- REST APIs tested using **Postman**
+- Asynchronous flows verified via:
+  - RabbitMQ management UI
+  - Inventory updates after order placement
+- Metrics verified via **Prometheus UI**
