@@ -6,7 +6,7 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 
 ---
 
-## Key Features
+## 1. Key Features
 
 - Backend-only microservices architecture
 - Polyglot microservices (Java + Node.js)
@@ -21,7 +21,7 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 
 ---
 
-## Technology Stack
+## 2. Technology Stack
 
 ### Backend
 - Java 21
@@ -45,7 +45,7 @@ This project is implemented using Spring Boot and Node.js microservices, RabbitM
 
 ---
 
-## System Architecture
+## 3. System Architecture
 
 ![Architecture Diagram](docs/architecture.png)
 
